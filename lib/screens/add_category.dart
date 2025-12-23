@@ -4,23 +4,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/app_db.dart';
 import '../providers/category_provider.dart';
 
+// categoryNameControllerProvider：カテゴリ名入力用のTextEditingControllerを提供
+// Provider.autoDispose：ウィジェットが破棄されたら自動的にリソースを解放する
+// これによりメモリリークを防ぐことができます
 final categoryNameControllerProvider = Provider.autoDispose<TextEditingController>((ref) {
+  // TextEditingControllerを作成
   final controller = TextEditingController();
+  // ref.onDispose：プロバイダーが破棄される際のクリーンアップ処理
+  // TextEditingControllerを破棄してメモリを解放
   ref.onDispose(controller.dispose);
   return controller;
 });
 
+// AddCategory：カテゴリの追加・編集画面
+// ConsumerWidget：状態を持たないシンプルな画面（StatelessWidgetにRiverpod機能を追加）
 class AddCategory extends ConsumerWidget {
+  // category：編集するカテゴリデータ（nullの場合は新規追加モード）
   final VCategoryData? category;
 
   const AddCategory({super.key, this.category});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // プロバイダーからTextEditingControllerを取得
     final nameController = ref.watch(categoryNameControllerProvider);
 
+    // 編集モードの場合、初期値を設定
     if (category != null) {
+      // ビルド完了後に実行（ビルド中は状態を変更できないため）
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        // 空の場合のみ設定（二重設定を防ぐ）
         if (nameController.text.isEmpty) {
           nameController.text = category!.name;
         }
@@ -220,20 +233,27 @@ class AddCategory extends ConsumerWidget {
     );
   }
 
+  // _saveCategory：カテゴリデータを保存するメソッド
   Future<void> _saveCategory(BuildContext context, WidgetRef ref, GlobalKey<FormState> formKey) async {
+    // フォームのバリデーション（入力チェック）を実行
     if (!formKey.currentState!.validate()) {
-      return;
+      return; // バリデーションエラーがある場合は処理を中断
     }
 
     final nameController = ref.read(categoryNameControllerProvider);
-    final categoryName = nameController.text.trim();
+    final categoryName = nameController.text.trim(); // 前後の空白を削除
 
+    // 新規作成モード、または編集モードで名前が変更された場合のみ重複チェック
+    // （同じ名前で更新する場合はチェック不要）
     if (category == null || category!.name != categoryName) {
       final categoryNotifier = ref.read(categoryProvider.notifier);
+      // カテゴリ名の重複をチェック
       final exists = await categoryNotifier.categoryNameExists(categoryName);
 
+      // 既に同じ名前のカテゴリが存在する場合
       if (exists) {
         if (context.mounted) {
+          // エラーメッセージをSnackBarで表示
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Row(
@@ -253,18 +273,23 @@ class AddCategory extends ConsumerWidget {
             ),
           );
         }
+        // 重複エラーのため処理を中断
         return;
       }
     }
 
+    // VCategoryCompanion：カテゴリデータを挿入・更新するためのクラス
     final categoryCompanion = VCategoryCompanion(
+      // 編集モードの場合はIDを設定、新規作成の場合はIDを自動採番
       id: category != null ? drift.Value(category!.id) : const drift.Value.absent(),
-      name: drift.Value(categoryName),
+      name: drift.Value(categoryName), // カテゴリ名を設定
     );
 
     final categoryNotifier = ref.read(categoryProvider.notifier);
 
+    // 新規作成モード
     if (category == null) {
+      // カテゴリを追加（成功/失敗をboolで取得）
       final success = await categoryNotifier.addCategory(categoryCompanion);
       if (context.mounted) {
         if (success) {

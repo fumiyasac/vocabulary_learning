@@ -5,16 +5,26 @@ import '../providers/category_provider.dart';
 import 'add_vocabulary.dart';
 import 'add_category.dart';
 
+// VocabularyHome：アプリのホーム画面
+// ConsumerWidget：Riverpodの状態を監視できるウィジェット
+// 通常のStatelessWidgetと異なり、refパラメータを通じてプロバイダーにアクセスできます
 class VocabularyHome extends ConsumerWidget {
   const VocabularyHome({super.key});
 
+  // build：画面のUIを構築するメソッド
+  // WidgetRef ref：Riverpodプロバイダーへのアクセスを提供する参照
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ref.watch()：プロバイダーを監視し、状態が変更されたら自動的に再ビルド
+    // vocabularyProviderの状態を取得
     final vocabularyState = ref.watch(vocabularyProvider);
+    // categoryProviderの状態を取得
     final categoryState = ref.watch(categoryProvider);
 
+    // Scaffold：Material Designの基本的な画面構造を提供するウィジェット
+    // AppBar、Body、FloatingActionButtonなどの標準的なレイアウトを簡単に構築できます
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface, // 背景色をテーマから取得
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -62,8 +72,12 @@ class VocabularyHome extends ConsumerWidget {
     );
   }
 
+  // _buildCategoryFilter：カテゴリフィルターUIを構築するメソッド
   Widget _buildCategoryFilter(BuildContext context, WidgetRef ref, CategoryState categoryState) {
+    // ref.read()：プロバイダーのNotifier（メソッド）にアクセス（再ビルドは不要）
+    // vocabularyNotifierを取得してfilterByCategoryメソッドを呼び出せるようにする
     final vocabularyNotifier = ref.read(vocabularyProvider.notifier);
+    // 現在選択されているカテゴリIDを取得
     final selectedCategoryId = ref.watch(vocabularyProvider).selectedCategoryId;
 
     return Container(
@@ -104,21 +118,27 @@ class VocabularyHome extends ConsumerWidget {
           ),
           SizedBox(
             height: 56,
+            // 横スクロール可能なリストビュー（カテゴリチップを表示）
             child: ListView(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.horizontal, // 横方向にスクロール
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               children: [
+                // 「All」フィルターチップ（すべての語彙を表示）
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
                     label: const Text('All'),
+                    // selectedCategoryIdがnullなら選択中
                     selected: selectedCategoryId == null,
+                    // タップされたら全件表示モードに切り替え
                     onSelected: (_) => vocabularyNotifier.filterByCategory(null),
                     selectedColor: Theme.of(context).colorScheme.primaryContainer,
                     checkmarkColor: Theme.of(context).colorScheme.primary,
-                    showCheckmark: true,
+                    showCheckmark: true, // チェックマークを表示
                   ),
                 ),
+                // スプレッド演算子(...)：リストを展開して個別の要素として追加
+                // 各カテゴリをFilterChipとして表示
                 ...categoryState.categories.map((category) {
                   final isSelected = selectedCategoryId == category.id;
                   return Padding(
@@ -126,6 +146,7 @@ class VocabularyHome extends ConsumerWidget {
                     child: FilterChip(
                       label: Text(category.name),
                       selected: isSelected,
+                      // タップされたらそのカテゴリでフィルタリング
                       onSelected: (_) => vocabularyNotifier.filterByCategory(category.id),
                       selectedColor: Theme.of(context).colorScheme.primaryContainer,
                       checkmarkColor: Theme.of(context).colorScheme.primary,
@@ -141,12 +162,16 @@ class VocabularyHome extends ConsumerWidget {
     );
   }
 
+  // _buildVocabularyList：語彙リストのUIを構築するメソッド
+  // 状態に応じて異なるUIを表示（読み込み中、空、リスト表示）
   Widget _buildVocabularyList(BuildContext context, WidgetRef ref, VocabularyState state) {
+    // 読み込み中の場合：ローディングインジケーターを表示
     if (state.isLoading) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // CircularProgressIndicator：くるくる回るローディングアニメーション
             CircularProgressIndicator(
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -162,6 +187,7 @@ class VocabularyHome extends ConsumerWidget {
       );
     }
 
+    // データが空の場合：空状態のメッセージを表示
     if (state.filteredVocabularies.isEmpty) {
       return Center(
         child: Padding(
@@ -206,11 +232,17 @@ class VocabularyHome extends ConsumerWidget {
       );
     }
 
+    // ListView.builder：リストを効率的に表示するウィジェット
+    // スクロール可能なリストを構築し、画面に表示される項目だけを生成（パフォーマンス最適化）
     return ListView.builder(
       padding: const EdgeInsets.all(16),
+      // itemCount：リストの項目数
       itemCount: state.filteredVocabularies.length,
+      // itemBuilder：各項目のUIを構築する関数
+      // index：現在の項目のインデックス（0から始まる）
       itemBuilder: (context, index) {
         final vocabulary = state.filteredVocabularies[index];
+        // 各語彙データのカードウィジェットを返す
         return _buildVocabularyCard(context, ref, vocabulary, index);
       },
     );
@@ -225,17 +257,25 @@ class VocabularyHome extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+      // InkWell：タップ可能な領域を作成し、タップ時にリップルエフェクト（波紋効果）を表示
       child: InkWell(
+        // onTap：タップされたときの処理
         onTap: () {
+          // Navigator.push：新しい画面に遷移
+          // Flutterのナビゲーションは「スタック」構造（画面を積み重ねる）
           Navigator.push(
             context,
+            // MaterialPageRoute：Material Designのページ遷移アニメーションを提供
             MaterialPageRoute(
+              // builder：遷移先の画面を構築
+              // 語彙データを渡して編集画面を開く
               builder: (_) => AddVocabulary(vocabulary: vocabulary),
             ),
           );
         },
+        // onLongPress：長押しされたときの処理
         onLongPress: () => _showDeleteDialog(context, ref, vocabulary),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16), // リップルエフェクトの範囲を角丸に
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -396,8 +436,8 @@ class VocabularyHome extends ConsumerWidget {
               const SizedBox(height: 8),
               const Text(
                 '• Tap a card to edit\n'
-                '• Long press to delete\n'
-                '• Use categories to organize',
+                    '• Long press to delete\n'
+                    '• Use categories to organize',
                 style: TextStyle(fontSize: 13),
               ),
             ],

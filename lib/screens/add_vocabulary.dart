@@ -5,7 +5,11 @@ import '../database/app_db.dart';
 import '../providers/vocabulary_provider.dart';
 import '../providers/category_provider.dart';
 
+// AddVocabulary：語彙の追加・編集画面
+// ConsumerStatefulWidget：Riverpodの状態監視機能を持つStatefulWidget
+// StatefulWidgetは内部状態（フォームの入力値など）を保持できるウィジェット
 class AddVocabulary extends ConsumerStatefulWidget {
+  // vocabulary：編集する語彙データ（nullの場合は新規追加モード）
   final VocabularyData? vocabulary;
 
   const AddVocabulary({super.key, this.vocabulary});
@@ -14,29 +18,48 @@ class AddVocabulary extends ConsumerStatefulWidget {
   ConsumerState<AddVocabulary> createState() => _AddVocabularyState();
 }
 
+// _AddVocabularyState：AddVocabularyウィジェットの状態を管理するクラス
 class _AddVocabularyState extends ConsumerState<AddVocabulary> {
+  // _formKey：フォーム全体を識別し、バリデーション（入力チェック）を実行するためのキー
   final _formKey = GlobalKey<FormState>();
+
+  // TextEditingController：テキストフィールドの入力値を管理するコントローラー
+  // late：初期化を後回しにする（initStateで初期化）
   late final TextEditingController _wordController;
   late final TextEditingController _definitionController;
   late final TextEditingController _exampleController;
+
+  // _selectedCategory：選択されたカテゴリ（nullの場合はカテゴリなし）
   VCategoryData? _selectedCategory;
+
+  // _isMastered：習得済みフラグ
   bool _isMastered = false;
 
+  // initState：ウィジェットが作成されたときに一度だけ呼ばれる初期化メソッド
   @override
   void initState() {
     super.initState();
+    // コントローラーを初期化
+    // 編集モードの場合は既存のデータを設定、新規作成の場合は空文字
     _wordController = TextEditingController(text: widget.vocabulary?.word ?? '');
     _definitionController = TextEditingController(text: widget.vocabulary?.definition ?? '');
     _exampleController = TextEditingController(text: widget.vocabulary?.exampleSentence ?? '');
     _isMastered = widget.vocabulary?.mastered ?? false;
 
+    // 編集モードの場合、カテゴリ情報を設定
     if (widget.vocabulary != null) {
+      // addPostFrameCallback：ウィジェットが完全に構築された後に実行
+      // 最初のビルドが完了するまで待ってから状態を更新する必要がある
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        // ref.read()：一度だけプロバイダーの値を読み取る
         final categoryState = ref.read(categoryProvider);
+        // 語彙データのcategoryIdに一致するカテゴリを検索
         final category = categoryState.categories
             .where((c) => c.id == widget.vocabulary!.categoryId)
             .firstOrNull;
+        // カテゴリが見つかり、かつウィジェットがまだマウントされている場合
         if (category != null && mounted) {
+          // setState()：状態を更新してUIを再ビルド
           setState(() {
             _selectedCategory = category;
           });
@@ -45,8 +68,11 @@ class _AddVocabularyState extends ConsumerState<AddVocabulary> {
     }
   }
 
+  // dispose：ウィジェットが破棄されるときに呼ばれるクリーンアップメソッド
+  // メモリリークを防ぐため、使わなくなったリソースを解放する
   @override
   void dispose() {
+    // TextEditingControllerを破棄（メモリを解放）
     _wordController.dispose();
     _definitionController.dispose();
     _exampleController.dispose();
@@ -219,8 +245,8 @@ class _AddVocabularyState extends ConsumerState<AddVocabulary> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: _isMastered
-                      ? Colors.green.withOpacity(0.2)
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ? Colors.green.withOpacity(0.2)
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -291,25 +317,39 @@ class _AddVocabularyState extends ConsumerState<AddVocabulary> {
     );
   }
 
+  // _saveVocabulary：語彙データを保存するメソッド
   Future<void> _saveVocabulary() async {
+    // フォームのバリデーション（入力チェック）を実行
+    // validate()：各TextFormFieldのvalidator関数を実行し、エラーがないかチェック
     if (!_formKey.currentState!.validate()) {
+      // バリデーションに失敗した場合は処理を中断
       return;
     }
 
+    // VocabularyCompanion：Driftで使用するデータクラス
+    // 挿入・更新時にどのフィールドを設定するかを明示的に指定できます
     final vocabularyCompanion = VocabularyCompanion(
+      // 編集モードの場合はIDを設定、新規作成の場合はIDを自動採番させる（Value.absent()）
       id: widget.vocabulary != null ? drift.Value(widget.vocabulary!.id) : const drift.Value.absent(),
-      word: drift.Value(_wordController.text.trim()),
+      // Value()：Driftで値を明示的に設定するためのラッパー
+      word: drift.Value(_wordController.text.trim()), // trim()：前後の空白を削除
       definition: drift.Value(_definitionController.text.trim()),
+      // 例文が空の場合はnull、それ以外は入力値を設定
       exampleSentence: drift.Value(
         _exampleController.text.trim().isEmpty ? null : _exampleController.text.trim(),
       ),
-      categoryId: drift.Value(_selectedCategory?.id),
-      mastered: drift.Value(_isMastered),
+      categoryId: drift.Value(_selectedCategory?.id), // カテゴリのID（未選択の場合はnull）
+      mastered: drift.Value(_isMastered), // 習得フラグ
     );
 
+    // 新規作成モード
     if (widget.vocabulary == null) {
+      // vocabularyProviderのnotifierを通じてaddVocabularyメソッドを呼び出す
       await ref.read(vocabularyProvider.notifier).addVocabulary(vocabularyCompanion);
+      // context.mounted：ウィジェットがまだ画面に表示されているかをチェック
+      // 非同期処理後にウィジェットが破棄されている可能性があるため、必ずチェックが必要
       if (context.mounted) {
+        // SnackBar：画面下部に一時的に表示される通知メッセージ
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(
