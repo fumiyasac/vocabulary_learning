@@ -15,7 +15,6 @@
 - [セットアップ方法](#セットアップ方法)
 - [開発コマンド](#開発コマンド)
 - [コード解説](#コード解説)
-- [拡張性](#拡張性)
 
 ---
 
@@ -592,84 +591,6 @@ Row(
 )
 ```
 
----
-
-## 拡張性
-
-このアーキテクチャは以下の機能追加に対応しやすい設計となっています。
-
-### 1. クラウド同期
-
-```dart
-// Repository層にRemote APIを追加
-class VocabularyRepository {
-  final AppDb _localDb;
-  final ApiClient _apiClient;
-
-  Future<void> sync() async {
-    final remoteData = await _apiClient.fetchVocabularies();
-    await _localDb.into(_localDb.vocabulary).insertAll(remoteData);
-  }
-}
-```
-
-### 2. 検索機能
-
-```dart
-// Repository
-Future<List<VocabularyData>> search(String query) {
-  return (_db.select(_db.vocabulary)
-    ..where((v) => v.word.like('%$query%') | v.definition.like('%$query%')))
-      .get();
-}
-
-// Provider
-void searchVocabularies(String query) async {
-  final results = await _repository.search(query);
-  state = state.copyWith(filteredVocabularies: results);
-}
-```
-
-### 3. エクスポート機能
-
-```dart
-Future<String> exportToCsv() async {
-  final vocabularies = await repository.getAllVocabularies();
-  final csv = StringBuffer('word,definition,example,mastered\n');
-  for (final v in vocabularies) {
-    csv.writeln('${v.word},${v.definition},${v.exampleSentence},${v.mastered}');
-  }
-  return csv.toString();
-}
-```
-
-### 4. 多言語対応（i18n）
-
-```yaml
-# pubspec.yaml
-dependencies:
-  flutter_localizations:
-    sdk: flutter
-  intl: ^0.18.0
-```
-
-### 5. ユーザー認証
-
-```dart
-// Firebase Authentication連携
-@riverpod
-class AuthNotifier extends _$AuthNotifier {
-  Future<void> signIn(String email, String password) async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-  }
-}
-```
-
----
-
 ## テーマ設定
 
 ### Material Design 3
@@ -706,14 +627,3 @@ MaterialApp(
 | フォントウェイト（タイトル） | w600-w700 |
 | レタースペーシング | 0.3-0.5 |
 
----
-
-## ライセンス
-
-このプロジェクトはプライベートプロジェクトです。
-
----
-
-## 作者
-
-vocabulary_learning開発チーム
