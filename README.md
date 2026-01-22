@@ -2,34 +2,6 @@
 
 英語などの語彙を効率的に学習・管理するためのFlutterアプリケーションです。単語、定義、例文を追加・編集でき、カテゴリで整理し、習得状態を管理できます。
 
-## 目次
-
-- [概要](#概要)
-- [主な機能](#主な機能)
-- [技術スタック](#技術スタック)
-- [プロジェクト構成](#プロジェクト構成)
-- [アーキテクチャ](#アーキテクチャ)
-- [データベース設計](#データベース設計)
-- [状態管理](#状態管理)
-- [画面構成](#画面構成)
-- [セットアップ方法](#セットアップ方法)
-- [開発コマンド](#開発コマンド)
-- [コード解説](#コード解説)
-
----
-
-## 概要
-
-| 項目 | 内容 |
-|------|------|
-| アプリ名 | Vocabulary Learning App |
-| バージョン | 1.0.0 |
-| Dart SDK | 3.10.4以上 |
-| Flutter | 3.x |
-| 対応プラットフォーム | iOS / Android / Web |
-
----
-
 ## 主な機能
 
 ### 語彙管理
@@ -41,12 +13,6 @@
 - カテゴリの作成・編集・削除
 - 重複名のバリデーション
 - カテゴリ別フィルタリング
-
-### UI/UX
-- Material Design 3準拠
-- ライト/ダークテーマ自動切り替え
-- レスポンシブレイアウト
-- 直感的なカードベースUI
 
 ---
 
@@ -76,26 +42,26 @@
 
 ```
 lib/
-├── main.dart                    # アプリケーションエントリーポイント
+├── main.dart                       # アプリケーションエントリーポイント
 │
-├── database/                    # データベース層
-│   ├── app_db.dart             # Driftデータベース定義・マイグレーション
-│   ├── app_db.g.dart           # 自動生成ファイル
-│   └── db_tables.dart          # テーブル定義（Vocabulary, VCategory）
+├── database/                       # データベース層
+│   ├── app_db.dart                 # Driftデータベース定義・マイグレーション
+│   ├── app_db.g.dart               # 自動生成ファイル
+│   └── db_tables.dart              # テーブル定義（Vocabulary, VCategory）
 │
-├── providers/                   # 状態管理層
-│   ├── database_provider.dart  # DBシングルトンプロバイダー
-│   ├── vocabulary_provider.dart # 語彙状態管理
-│   └── category_provider.dart  # カテゴリ状態管理
+├── providers/                      # 状態管理層
+│   ├── database_provider.dart      # DBシングルトンプロバイダー
+│   ├── vocabulary_provider.dart    # 語彙状態管理
+│   └── category_provider.dart      # カテゴリ状態管理
 │
-├── repositories/                # データアクセス層
-│   ├── vocabulary_repository.dart # 語彙CRUD操作
-│   └── category_repository.dart   # カテゴリCRUD操作
+├── repositories/                   # データアクセス層
+│   ├── vocabulary_repository.dart  # 語彙CRUD操作
+│   └── category_repository.dart    # カテゴリCRUD操作
 │
-└── screens/                     # UI層
-    ├── vocabulary_home.dart    # ホーム画面（一覧表示）
-    ├── add_vocabulary.dart     # 語彙追加・編集画面
-    └── add_category.dart       # カテゴリ追加・編集画面
+└── screens/                        # UI層
+    ├── vocabulary_home.dart        # ホーム画面（一覧表示）
+    ├── add_vocabulary.dart         # 語彙追加・編集画面
+    └── add_category.dart           # カテゴリ追加・編集画面
 ```
 
 ---
@@ -115,7 +81,7 @@ flowchart TB
         S3[add_category.dart]
     end
 
-    subgraph State["State Management (Providers)"]
+    subgraph State["State (Providers)"]
         direction LR
         P1[VocabularyNotifier]
         P2[CategoryNotifier]
