@@ -212,11 +212,11 @@ MigrationStrategy get migration => MigrationStrategy(
 ```dart
 // 状態クラス（Immutable）
 class VocabularyState {
-  final List<VocabularyData> vocabularies;        // 全語彙リスト
+  final List<VocabularyData> vocabularies;         // 全語彙リスト
   final List<VocabularyData> filteredVocabularies; // フィルタ済みリスト
-  final int? selectedCategoryId;                  // 選択中カテゴリID
-  final bool isLoading;                           // ローディング状態
-  final String? error;                            // エラーメッセージ
+  final int? selectedCategoryId;                   // 選択中カテゴリID
+  final bool isLoading;                            // ローディング状態
+  final String? error;                             // エラーメッセージ
 
   // copyWith()で新しいインスタンスを生成して状態更新
   VocabularyState copyWith({...}) => VocabularyState(...);
