@@ -1,24 +1,23 @@
-# Vocabulary Learning App
+# Vocabulary Learning App Example
 
-英語などの語彙を効率的に学習・管理するためのFlutterアプリケーションです。単語、定義、例文を追加・編集でき、カテゴリで整理し、習得状態を管理できます。
+Flutter ＆ Riverpod & Driftを利用した英語などの語彙を効率的に学習・管理するアプリサンプルになります。
+単語、定義、例文を追加・編集でき、カテゴリで整理し、習得状態を管理できる様な仕様となっています。
 
-## 主な機能
+## 📄 主な機能
 
-### 語彙管理
+### 1.語彙管理
 - 単語、定義、例文の登録・編集・削除
 - 習得状態（Mastered）のトグル管理
 - カテゴリによる分類
 
-### カテゴリ管理
+### 2.カテゴリ管理
 - カテゴリの作成・編集・削除
 - 重複名のバリデーション
 - カテゴリ別フィルタリング
 
----
+## 📄 技術スタック
 
-## 技術スタック
-
-### 主要パッケージ
+### 1.主要パッケージ
 
 | パッケージ | バージョン | 用途 |
 |-----------|-----------|------|
@@ -27,7 +26,7 @@
 | [flutter_riverpod](https://pub.dev/packages/flutter_riverpod) | ^3.0.3 | 状態管理フレームワーク |
 | [riverpod_annotation](https://pub.dev/packages/riverpod_annotation) | ^3.0.0 | Riverpodコード生成アノテーション |
 
-### 開発用パッケージ
+### 2. 開発用パッケージ
 
 | パッケージ | バージョン | 用途 |
 |-----------|-----------|------|
@@ -36,9 +35,7 @@
 | [riverpod_generator](https://pub.dev/packages/riverpod_generator) | ^3.0.0 | Riverpodコード生成 |
 | [riverpod_lint](https://pub.dev/packages/riverpod_lint) | ^3.0.0 | Riverpod用リントルール |
 
----
-
-## プロジェクト構成
+## 📄 プロジェクト構成
 
 ```
 lib/
@@ -64,11 +61,9 @@ lib/
     └── add_category.dart           # カテゴリ追加・編集画面
 ```
 
----
+## 📄 アーキテクチャ
 
-## アーキテクチャ
-
-### レイヤードアーキテクチャ
+### 1.レイヤードアーキテクチャ
 
 本プロジェクトは**クリーンアーキテクチャ**の原則に基づいた4層構造を採用しています。
 
@@ -113,7 +108,7 @@ flowchart TB
 | **Repository Layer** | データアクセス抽象化、CRUD操作のカプセル化 |
 | **Database Layer** | SQLiteデータベース操作、マイグレーション管理 |
 
-### データフロー
+### 2.データフロー
 
 ```mermaid
 sequenceDiagram
@@ -138,11 +133,9 @@ sequenceDiagram
     Provider-->>Screen: UI再ビルド
 ```
 
----
+## 📄 データベース設計
 
-## データベース設計
-
-### ER図
+### 1.ER図
 
 ```mermaid
 erDiagram
@@ -167,7 +160,7 @@ erDiagram
     }
 ```
 
-### Vocabularyテーブル
+### 2.Vocabularyテーブル
 
 | カラム | 型 | 制約 | 説明 |
 |--------|-----|------|------|
@@ -180,7 +173,7 @@ erDiagram
 | `createdAt` | DATETIME | NOT NULL | 作成日時 |
 | `updatedAt` | DATETIME | NOT NULL | 更新日時 |
 
-### VCategoryテーブル
+### 3.VCategoryテーブル
 
 | カラム | 型 | 制約 | 説明 |
 |--------|-----|------|------|
@@ -189,7 +182,7 @@ erDiagram
 | `createdAt` | DATETIME | NOT NULL | 作成日時 |
 | `updatedAt` | DATETIME | NOT NULL | 更新日時 |
 
-### マイグレーション
+### 4.マイグレーション
 
 ```dart
 // スキーマバージョン: 2
@@ -208,11 +201,9 @@ MigrationStrategy get migration => MigrationStrategy(
 );
 ```
 
----
+## 📄 状態管理
 
-## 状態管理
-
-### Riverpod + コード生成
+### 1.Riverpod＆コード生成
 
 本プロジェクトでは `@riverpod` アノテーションによるコード生成パターンを採用しています。
 
@@ -243,7 +234,7 @@ class VocabularyNotifier extends _$VocabularyNotifier {
 }
 ```
 
-### CategoryProvider
+### 2.CategoryProvider
 
 ```dart
 class CategoryState {
@@ -263,7 +254,7 @@ class CategoryNotifier extends _$CategoryNotifier {
 }
 ```
 
-### DatabaseProvider
+### 3.DatabaseProvider
 
 ```dart
 // keepAlive: true でアプリ全体で単一インスタンスを保持
@@ -271,11 +262,9 @@ class CategoryNotifier extends _$CategoryNotifier {
 AppDb database(Ref ref) => AppDb();
 ```
 
----
+## 📄 画面構成
 
-## 画面構成
-
-### 1. ホーム画面（vocabulary_home.dart）
+### 1.ホーム画面（vocabulary_home.dart）
 
 #### 画面構成
 
@@ -286,13 +275,6 @@ AppDb database(Ref ref) => AppDb();
 | **語彙リスト** | カード形式で単語・定義・例文・カテゴリを表示 |
 | **FAB** | 「+ Add New」ボタンで新規追加画面へ遷移 |
 
-#### カード表示例
-
-> **apple** ✓
-> りんご、果物の一種
-> *"I eat an apple every day."*
-> 📁 Food
-
 **主な機能：**
 - `ref.watch(vocabularyProvider)` で状態監視・自動再ビルド
 - `FilterChip` によるカテゴリフィルタリング
@@ -301,7 +283,7 @@ AppDb database(Ref ref) => AppDb();
 - チェックボックス → 習得状態トグル
 - 空状態・ローディング状態の表示
 
-### 2. 語彙追加・編集画面（add_vocabulary.dart）
+### 2.語彙追加・編集画面（add_vocabulary.dart）
 
 #### 画面構成
 
@@ -330,7 +312,7 @@ AppDb database(Ref ref) => AppDb();
 - カテゴリ選択（ドロップダウン）
 - 習得状態チェックボックス
 
-### 3. カテゴリ追加・編集画面（add_category.dart）
+### 3.カテゴリ追加・編集画面（add_category.dart）
 
 #### 画面構成
 
@@ -342,26 +324,20 @@ AppDb database(Ref ref) => AppDb();
 | **サンプル** | クイック選択用のサンプルカテゴリチップ |
 | **送信ボタン** | 「+ Add Category」ボタン |
 
-#### サンプルカテゴリ
-
-`Business` `Travel` `Technology` `Food` `Medical` `Academic` `Entertainment`
-
 **主な機能：**
 - `ConsumerWidget`（ステートレス）
 - カテゴリ名の重複チェック
 - サンプルカテゴリのクイック選択
 - `ref.invalidate()` による状態リフレッシュ
 
----
+## 📄 セットアップ方法
 
-## セットアップ方法
-
-### 前提条件
+### 1.前提条件
 
 - Flutter SDK 3.x以上
 - Dart SDK 3.10.4以上
 
-### インストール
+### 2.インストール
 
 ```bash
 # リポジトリをクローン
@@ -378,11 +354,9 @@ flutter pub run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
----
+## 📄 開発コマンド
 
-## 開発コマンド
-
-### コード生成
+### 1.コード生成
 
 ```bash
 # 一回限りのビルド
@@ -392,13 +366,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 flutter pub run build_runner watch --delete-conflicting-outputs
 ```
 
-### テスト実行
-
-```bash
-flutter test
-```
-
-### ビルド
+### 2.ビルド
 
 ```bash
 # Android APK
@@ -411,13 +379,11 @@ flutter build ios
 flutter build web
 ```
 
----
-
-## コード解説
+## 📄 コード解説
 
 ### 主要な実装パターン
 
-#### 1. Immutable State パターン
+#### ①Immutable State パターン
 
 状態クラスは不変（Immutable）として設計され、状態更新時は常に新しいインスタンスを生成します。
 
@@ -449,7 +415,7 @@ class VocabularyState {
 - 予期しない状態変更を防止
 - Riverpodの状態比較が正確に動作
 
-#### 2. 依存性注入（DI）パターン
+#### ②依存性注入（DI）パターン
 
 RepositoryクラスはDatabaseインスタンスをコンストラクタで受け取ります。
 
@@ -477,7 +443,7 @@ VocabularyRepository vocabularyRepository(Ref ref) {
 - 依存関係が明示的
 - 単一責任の原則を遵守
 
-#### 3. カスケード演算子（..）
+#### ③カスケード演算子（..）
 
 Driftのクエリビルダーでメソッドチェーンを構築します。
 
@@ -495,7 +461,7 @@ Future<List<VocabularyData>> getByCategory(int categoryId) {
 - `select()` の戻り値に対して `where()` を呼び出し
 - 最終的に同じオブジェクトに対して `.get()` を実行
 
-#### 4. addPostFrameCallback パターン
+#### ④addPostFrameCallback パターン
 
 Widgetのビルド完了後に非同期処理を実行します。
 
@@ -520,7 +486,7 @@ void initState() {
 - `initState()` 内で `ref.read()` を直接呼ぶと例外発生
 - ビルド完了後なら安全にProviderアクセス可能
 
-#### 5. スプレッド演算子（...）
+#### ⑤スプレッド演算子（...）
 
 リストを展開してWidgetツリーに追加します。
 
