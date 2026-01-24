@@ -434,7 +434,7 @@ class VocabularyRepository {
 @riverpod
 VocabularyRepository vocabularyRepository(Ref ref) {
   final db = ref.watch(databaseProvider);  // DBを取得
-  return VocabularyRepository(db);          // 注入
+  return VocabularyRepository(db);         // 注入
 }
 ```
 
