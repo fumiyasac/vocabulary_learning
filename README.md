@@ -15,6 +15,16 @@ Flutter ＆ Riverpod & Driftを利用した英語などの語彙を効率的に�
 - 重複名のバリデーション
 - カテゴリ別フィルタリング
 
+### 3.画面スクリーンショット
+
+__【iOS】__
+
+<img src="./images/example_capture_of_ios1.png" width="320"> <img src="./images/example_capture_of_ios2.png" width="320">
+
+__【Android】__
+
+<img src="./images/example_capture_of_android1.png" width="320"> <img src="./images/example_capture_of_android2.png" width="320">
+
 ## 📄 技術スタック
 
 ### 1.主要パッケージ
